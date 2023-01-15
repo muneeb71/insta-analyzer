@@ -229,4 +229,6 @@ flask
 numpy
 transformers
 instaloader
+pandas
+emoji
 
