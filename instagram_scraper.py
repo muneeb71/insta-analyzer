@@ -1,6 +1,5 @@
 import instaloader
 from instaloader import Post
-import pandas as pd
 from sentiment_analysis import SentimentAnalysis
 
 class instascraper():

@@ -226,9 +226,7 @@
 # zstd=1.4.9=ha95c52a_0
 
 flask
-numpy
 transformers
 instaloader
-pandas
 emoji
 

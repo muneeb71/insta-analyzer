@@ -19,7 +19,7 @@
 
 from flask import Flask
 from flask import request
-import json
+
 
 from instagram_scraper import instascraper
 app = Flask(__name__)
