@@ -3,3 +3,4 @@ Flask
 transformers
 emoji
 gunicorn
+torch
