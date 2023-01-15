@@ -1,6 +1,3 @@
 instaloader
 Flask
-transformers
-emoji
 gunicorn
-tensorflow

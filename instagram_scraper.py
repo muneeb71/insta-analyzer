@@ -1,12 +1,12 @@
 import instaloader
 from instaloader import Post
-from sentiment_analysis import SentimentAnalysis
+# from sentiment_analysis import SentimentAnalysis
 
 class instascraper():
     def __init__(self, username=None, password=None, session_user=None):
         self.L = instaloader.Instaloader(
             dirname_pattern="posts/{profile}/{date}")
-        self.analizer = SentimentAnalysis()
+        # self.analizer = SentimentAnalysis()
         if session_user is None and username and password is not None:
             print('logging in ... ')
             try:
