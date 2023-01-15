@@ -10,14 +10,25 @@ class instascraper():
         if session_user is None and username and password is not None:
             print('logging in ... ')
             try:
-                self.L.login(username, password)
-                print('logged in -> ', username)
-                self.Logged = 'logged'
-            except Exception as ex:
-                print(ex)
-                self.Logged = ex
-        elif session_user is not None:
-            self.L.load_session_from_file(session_user)
+                self.L.load_session_from_file(username)
+                name = self.L.test_login()
+                if(name is None):
+                    self.L.login(username, password)
+                    print('logged in -> ', username)
+                    self.L.save_session_to_file()   
+                    self.Logged = True
+                    print(name, "name")
+                    print('logged in using session-> ', username)
+            except Exception as e:
+                print('New User')
+                try:
+                    self.L.login(username, password)
+                    print('logged in -> ', username)
+                    self.L.save_session_to_file()   
+                    self.Logged = True
+                except Exception as ex:
+                    print(ex)
+                    self.Logged = ex
         else:
             pass
     
@@ -34,10 +45,8 @@ class instascraper():
     def get_profile_data( self, profile = None):
         if profile is None:
             profile = self.profile
-            print(profile)
-        if self.Logged == 'logged':
+        if profile.is_private == True and profile.followed_by_viewer == True and self.Logged:
             print("here")
-            
             try:
                 temp_has_public_story = profile.has_public_story
                 temp_has_viewable_story = profile.has_viewable_story
@@ -46,7 +55,6 @@ class instascraper():
                 temp_has_public_story = None
                 temp_has_viewable_story = None
             dict_profile_data = {
-            
             'user_id': profile.userid,
             'username': profile.username,
             'followed_by_viewer': profile.followed_by_viewer,
@@ -85,17 +93,8 @@ class instascraper():
             print('PRIVINFO NOT AVAILABLE')
             return dict_profile
         
-        temp_vect = []
 
-        try:
-            temp_has_public_story = profile.has_public_story
-            temp_has_viewable_story = profile.has_viewable_story
-        except Exception as ex:
-            print("EXECPTION -->", ex)
-            temp_has_public_story = None
-            temp_has_viewable_story = None
         dict_profile_data = {
-            'stories': profile.get_stories(),
             'user_id': profile.userid,
             'username': profile.username,
             'followed_by_viewer': profile.followed_by_viewer,
@@ -111,87 +110,85 @@ class instascraper():
             'follows_viewer': profile.follows_viewer,
             'full_name': profile.full_name,
             'has_blocked_viewer': profile.has_blocked_viewer,
-            'has_public_story': temp_has_public_story,
-            'has_viewable_story': temp_has_viewable_story,
             'has_requested_viewer': profile.has_requested_viewer,
             'is_verified': profile.is_verified,
             'requested_by_viewer': profile.requested_by_viewer,
             'profile_pic_url': profile.profile_pic_url,
             'has_higlighted_reels': profile.has_highlight_reels,
             'followed_by_viewer': profile.followed_by_viewer
-        }
-        temp_vect.append(dict_profile_data)
-        profile_data = pd.DataFrame(temp_vect, index = ['data_profile'])
+            }
+        # temp_vect.append(dict_profile_data)
+        # profile_data = pd.DataFrame(temp_vect, index = ['data_profile'])
 
         return dict_profile_data
 
     # GET DATA POST FROM SHORTCODE
-    def get_post_from_shortcode( self, SHORTCODE: str, MAX_COMMENT: int):
-        post = Post.from_shortcode(self.L.context, SHORTCODE)
-        try:
-            accessibility_caption = str(post._asdict()['accessibility_caption'])
-        except Exception as ex:
-            print(ex)
-        try:
-            location = post.location
-        except Exception as ex:
-            print(ex)
-            location = None
-            #INFORMATION OF THE POST GOING INTO THE CSV
-            post_info_dict = {
-                'title': post.title,
-                'owner_username': post.owner_username,
-                'date_and_time': post.date,
-                'type_of_post': post.typename,
-                'mediacount': post.mediacount,
-                'caption': post.caption,
-                'n_caption_hashatags': len(post.caption_hashtags),
-                'caption_hashtags': post.caption_hashtags,
-                'n_mentions_post': len(post.caption_mentions),
-                'n_tagged_users': len(post.tagged_users),
-                'is_video': post.is_video,
-                'n_likes': post.likes,
-                'n_comments': post.comments,
-                'is_sponsored': post.is_sponsored,
-                'sponsors': post.sponsor_users,
-                'location': location,
-                'url_link': post.url,
-                'url_insta': 'instagram.com/p/{}/'.format(post.shortcode),
-                'description_of_post': accessibility_caption,
-            }
-            comments_vect = []
-            # DOWNLOAD AND STORE COMMENT
-            print('Start Comments', end='')
+    # def get_post_from_shortcode( self, SHORTCODE: str, MAX_COMMENT: int):
+    #     post = Post.from_shortcode(self.L.context, SHORTCODE)
+    #     try:
+    #         accessibility_caption = str(post._asdict()['accessibility_caption'])
+    #     except Exception as ex:
+    #         print(ex)
+    #     try:
+    #         location = post.location
+    #     except Exception as ex:
+    #         print(ex)
+    #         location = None
+    #         #INFORMATION OF THE POST GOING INTO THE CSV
+    #         post_info_dict = {
+    #             'title': post.title,
+    #             'owner_username': post.owner_username,
+    #             'date_and_time': post.date,
+    #             'type_of_post': post.typename,
+    #             'mediacount': post.mediacount,
+    #             'caption': post.caption,
+    #             'n_caption_hashatags': len(post.caption_hashtags),
+    #             'caption_hashtags': post.caption_hashtags,
+    #             'n_mentions_post': len(post.caption_mentions),
+    #             'n_tagged_users': len(post.tagged_users),
+    #             'is_video': post.is_video,
+    #             'n_likes': post.likes,
+    #             'n_comments': post.comments,
+    #             'is_sponsored': post.is_sponsored,
+    #             'sponsors': post.sponsor_users,
+    #             'location': location,
+    #             'url_link': post.url,
+    #             'url_insta': 'instagram.com/p/{}/'.format(post.shortcode),
+    #             'description_of_post': accessibility_caption,
+    #         }
+    #         comments_vect = []
+    #         # DOWNLOAD AND STORE COMMENT
+    #         print('Start Comments', end='')
 
-            comment_count = 0
-            for comment in post.get_comments():
-                answer_count = 0
-                for answer in comment.answers:
-                    answer_count += 1
-                    if answer_count == 50:
-                        break
-                analisys, score = self.analizer.return_sentiment(
-                    str(comment.text).strip())
-                comment_info_dict = {
-                    'date_and_time': comment.created_at_utc,
-                    'profile': comment.owner.username,
-                    'text': str(comment.text).strip(),
-                    'n_likes': comment.likes_count,
-                    'answer_count': answer_count,
-                    'sentiment_analysis': analisys,
-                    'score': score
-                }
+    #         comment_count = 0
+    #         for comment in post.get_comments():
+    #             answer_count = 0
+    #             for answer in comment.answers:
+    #                 answer_count += 1
+    #                 if answer_count == 50:
+    #                     break
+    #             analisys, score = self.analizer.return_sentiment(
+    #                 str(comment.text).strip())
+    #             comment_info_dict = {
+    #                 'date_and_time': comment.created_at_utc,
+    #                 'profile': comment.owner.username,
+    #                 'text': str(comment.text).strip(),
+    #                 'n_likes': comment.likes_count,
+    #                 'answer_count': answer_count,
+    #                 'sentiment_analysis': analisys,
+    #                 'score': score
+    #             }
 
-                comments_vect.append(comment_info_dict)
-                if comment_count == MAX_COMMENT:
-                    break
-                comment_count += 1
-                print('.', end='')
-            print('End Comments')
-            comment_df = pd.DataFrame(comments_vect)
-            post_df = pd.DataFrame([post_info_dict])
+    #             comments_vect.append(comment_info_dict)
+    #             if comment_count == MAX_COMMENT:
+    #                 break
+    #             comment_count += 1
+    #             print('.', end='')
+    #         print('End Comments')
+    #         comment_df = pd.DataFrame(comments_vect)
+    #         post_df = pd.DataFrame([post_info_dict])
 
-            return post_df, comment_df
+    #         return post_df, comment_df
 
     #GET POST OF THE SETTET PROFILE OR SET profile input to set a new one
     def get_highlights(self, L = None, profile=None):
@@ -199,7 +196,6 @@ class instascraper():
                 profile = self.profile
             if L is None:
                 L = self.L
-            # profile_highlights = []
             info = []
             for item in L.get_highlights(profile):
                 profile_highlights = {"hightlight_info": {}, "items": []}
@@ -208,22 +204,21 @@ class instascraper():
                     'title': item.title,
                     'count': item.itemcount,
                     'cover': item.cover_url
-                    }
+                         }
                 profile_highlights['highlight_info'] = high_info_dict
                 for ht in item.get_items():
                     highlight_story = {
-                        # 'url': ht.url,
+                        'url': ht.url,
                         'date': ht.date_local,
-                        # 'is_video': ht.is_video,
-                        # 'video_url': ht.video_url,
+                        'is_video': ht.is_video,
+                        'video_url': ht.video_url,
                         }
                     profile_highlights['items'].append(highlight_story)
-                # profile_highlights.append(high_info_dict)
                 info.append(profile_highlights)
             return info  
                 
         
-    def get_post_and_comment(self, MAX_COMMENT: int, L = None, MAX_POST=5, profile=None):
+    def get_post_and_comment(self, MAX_COMMENT = 4, L = None, MAX_POST=2, profile=None):
         if profile is None:
             profile = self.profile
         if L is None:
@@ -257,6 +252,7 @@ class instascraper():
                 'n_mentions_post': len(post.caption_mentions),
                 'n_tagged_users': len(post.tagged_users),
                 'is_video': post.is_video,
+                'video_views': post.video_view_count,
                 'n_likes': post.likes,
                 'n_comments': post.comments,
                 'is_sponsored': post.is_sponsored,
@@ -273,26 +269,21 @@ class instascraper():
 
             comment_count = 0
             for comment in post.get_comments():
-                answer_count = 0
-                """
-                for answer in comment.answers:
-                    answer_count += 1
-                    if answer_count == 5:
-                        break
-                """
-                analisys, score = self.analizer.return_sentiment(
-                    str(comment.text).strip())
+                # answer_count = 0
+                # """
+                # for answer in comment.answers:
+                #     answer_count += 1
+                #     if answer_count == 5:
+                #         break
+                # """
+                # analisys, score = self.analizer.return_sentiment(
+                #     str(comment.text).strip())
                 comment_info_dict = {
                     'date_and_time': comment.created_at_utc,
                     'profile': comment.owner.username,
-                    'text': str(comment.text).strip(),
+                    'text': comment.text,
                     'n_likes': comment.likes_count,
-                   # 'answer_count': answer_count,
-                    'sentiment_analysis': analisys,
-                    'score': score
                 }
-
-
                 comments_vect.append(comment_info_dict)
                 if comment_count == MAX_COMMENT:
                     print("MAX COMMENT")
@@ -305,20 +296,35 @@ class instascraper():
             #L.download_pic(path_pic_jpg, post.url, post.date_utc)
 
             #STORING DATA SCRAPED AND UPLOAD RELATIVE CSVs
-            comment_df = pd.DataFrame(comments_vect)
-            post_df = pd.DataFrame([post_info_dict], index=['post_data'])
+            # comment_df = pd.DataFrame(comments_vect)
+            # post_df = pd.DataFrame([post_info_dict], index=['post_data'])
 
-            post = {'post_info': post_df, 'comments': comment_df}
+            post = {'post_info': post_info_dict, 'comments': comments_vect}
             post_profile['posts'].append(post)
             print("END__POST")
             #IF MAX POST DOWNLOADED BREAK
-            if counter_post % MAX_POST == 0:
+            if counter_post == MAX_POST:
                 print('Post Reached')
                 break
             counter_post += 1
 
         return post_profile
-
+    
+    def get_stories(self, L = None):
+        info = []
+        if L is None:
+            L = self.L
+        for items in L.get_stories([self.profile.userid]):
+            for item in items.get_items():
+                story = {
+                    'id': item.mediaid,
+                    'profile': item.profile,
+                    'url': item.url,
+                    'type': item.typename,
+                    'video_url': item.video_url
+                }
+                info.append(story)
+        return info
 if __name__ == '__main__':
     scraper = instascraper(username='test_lorenz', password='provaprova')
     profile = scraper.set_profile(username_profile="joridelli")

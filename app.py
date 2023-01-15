@@ -31,10 +31,14 @@ def hello():
    profile =  scraper.set_profile(request.args.get("user"))
    if profile == 404:
        return "404 ERROR"
-   info =  scraper.get_profile_data()
-   high = scraper.get_highlights( L = None, profile=None)
+   profile =  scraper.get_profile_data()
+#    high = scraper.get_highlights( L = None, profile=None)
+   post = scraper.get_post_and_comment()
+#    stories = scraper.get_stories(L = None)
    
-   return {'profile': info, 'highlights': high}
+   return {'profile': profile, 'highlights': [], 'posts': post, 'stories': []}
+#    info =  scraper.get_stories(L = None)
+#    return info
 
 if __name__ == '__main__':
     app.run(host='localhost', port=5000)
@@ -48,5 +52,5 @@ if __name__ == '__main__':
     # if profile == 404:
     #     return "404 ERROR"
     # info =  scraper.get_profile_data()
-    
+    # username="d77815381@gmail.com", password="Fop1020-25"
     # return info
