@@ -229,4 +229,4 @@ flask
 transformers
 instaloader
 emoji
-
+gunicorn
