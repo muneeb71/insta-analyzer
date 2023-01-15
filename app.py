@@ -28,7 +28,7 @@ app = Flask(__name__)
 def hello():
 
    scraper = instascraper(username="d77815381@gmail.com", password="Fop1020-25")
-   profile =  scraper.set_profile(request.args.get("user"))
+   profile =  scraper.set_profile(request.args.get("username"))
    if profile == 404:
        return "404 ERROR"
    profile =  scraper.get_profile_data()
