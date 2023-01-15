@@ -230,3 +230,4 @@ transformers
 instaloader
 emoji
 gunicorn
+torch
