@@ -27,7 +27,7 @@ app = Flask(__name__)
 @app.route('/')
 def hello():
 
-   scraper = instascraper(username="d77815381@gmail.com", password="Fop1020-25")
+   scraper = instascraper(username="shabanat12", password="Vhr@12345")
    profile =  scraper.set_profile(request.args.get("username"))
    if profile == 404:
        return "404 ERROR"
